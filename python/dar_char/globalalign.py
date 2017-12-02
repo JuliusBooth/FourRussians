@@ -18,7 +18,6 @@ def scoring(a1, a2):
 
 string1 = raw_input("Enter String 1: ")
 string2 = raw_input("Enter String 2: ")
-t = opts.tSize
 m = len(string1)
 n = len(string2)
 sys.stderr.write("Initializing matrix... \n")

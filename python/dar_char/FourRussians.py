@@ -3,15 +3,30 @@ import optparse, sys, os, logging, math, numpy
 
 optparser = optparse.OptionParser()
 #optparser.add_option("-d", "--datadir", dest="datadir", default="data", help="data directory (default=data)")
-optparser.add_option("-t", "--blocksize", dest="tSize", default=4, type="int", help="block of size t x t (default=4)")
+optparser.add_option("-t", "--blocksize", dest="tSize", default=0, type="int", help="block of size t x t (default=logn/4) where n = size of string")
 optparser.add_option("-b", "--blockpenalty", dest="bPenalty", default=-1, type="int", help="penalty for removing or inserting block (default=(-1)*t)")
 optparser.add_option("-s", "--matchscore", dest="mScore", default=2, type="int", help="Scoring for a match (default=2)")
 optparser.add_option("-m", "--mismatch", dest="mismatch", default=-1, type="int", help="Penalty for mismatching (default=-1)")
 optparser.add_option("-p", "--gappenalty", dest="gPenalty", default=-1, type="int", help="Penalty for gap (default=-1)")
 (opts, _) = optparser.parse_args()
 
+sys.stderr.write("INSERT ALL STRINGS IN LOWER CASE!!\n")
+string1 = raw_input("Enter String 1: ")
+string2 = raw_input("Enter String 2: ")
+
+m = len(string1)
+n = len(string2)
+
+t = 0
+if opts.tSize != 0: 
+	t = opts.tSize
+else:
+	t = int(math.ceil(math.log10(max(len(string1),len(string2)))/4))
+
+opts.bPenalty = opts.bPenalty * t
 #-------------------------------------------------
 # Generate lookup table for 4^t x 4^t
+sys.stderr.write("Creating Lookup Table...\n")
 
 def align (s1, s2): #scoring for LUT 
 	score = 0
@@ -24,19 +39,19 @@ def align (s1, s2): #scoring for LUT
 
 nStrings=[] #nucleotide string
 #init all possible blockstrings
-for i in range(pow(4, opts.tSize)):
+for i in range(pow(4, t)):
 	nStrings.append("")
 #init scores to 0
 lut=[]
-for i in range(pow(4,opts.tSize)):
+for i in range(pow(4, t)):
 	tscore=[]
-	for j in range(pow(4,opts.tSize)):
+	for j in range(pow(4, t)):
 		tscore.append(0)
 	lut.append(tscore)
 #print(lut)
 #generate all possible blockstrings, put into blockstrings list
-for j in range(opts.tSize, 0, -1):
-	for i in range(pow(4, opts.tSize)):
+for j in range(t, 0, -1):
+	for i in range(pow(4, t)):
 		if (i % pow(4,j)) in range(0, pow(4,j-1)):
 			nStrings[i]+="a"	
 		if (i % pow(4,j)) in range(pow(4,j-1), 2*pow(4,j-1)):
@@ -47,8 +62,8 @@ for j in range(opts.tSize, 0, -1):
 			nStrings[i]+="t"
 #print(nStrings)
 #align all blockstrings to each other to generate LUT of scores
-for i in range(0, pow(4, opts.tSize)):
-	for j in range(0, pow(4, opts.tSize)):
+for i in range(0, pow(4, t)):
+	for j in range(0, pow(4, t)):
 		s = align(nStrings[i], nStrings[j])
 		lut[i][j] = s
 #print(lut)
@@ -59,9 +74,9 @@ hTable = {}
 for i, n1 in enumerate(nStrings):
 	for j, n2 in enumerate(nStrings):
 		hTable[(n1,n2)] = lut[i][j]
-
+#print hTable
+sys.stderr.write("LUT complete...\n")
 #-------------------------------------------------
-
 def lut_search(i,j): #find LUT for ith block of v and jth block of u
 	key = (i,j)
 	return hTable[key]
@@ -84,13 +99,6 @@ def reg_score(b1,b2): #scoring for global pairwise alignment
 		return opts.gPenalty
 	else: return opts.mismatch
 
-sys.stderr.write("INSERT ALL STRINGS IN LOWER CASE!!\n")
-string1 = raw_input("Enter String 1: ")
-string2 = raw_input("Enter String 2: ")
-t = opts.tSize
-opts.bPenalty = opts.bPenalty * t
-m = len(string1)
-n = len(string2)
 sys.stderr.write("Initializing matrix... \n")
 dpMatrix = numpy.zeros(shape=(m+1,n+1))
 # Creating gap value penalities all along 0th column and row
@@ -116,6 +124,7 @@ for i in range(1, len(blocks1)+1):
 		delete = dpMatrix[i-1][j] + opts.bPenalty
 		insert = dpMatrix[i][j-1] + opts.bPenalty
 		dpMatrix[i][j] = max(match, delete, insert)
+		#print dpMatrix[i][j]
 
 # Traceback Algorithm
 sys.stderr.write("Performing traceback... \n")
@@ -168,4 +177,3 @@ print 'Identity =', "%3.3f" % identity, 'percent'
 print 'Score =', score
 print aligned1
 print aligned2
-
