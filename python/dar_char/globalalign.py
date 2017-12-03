@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import optparse, sys, os, logging, math, numpy
+import optparse, sys, os, logging, math, numpy, timeit
 
 optparser = optparse.OptionParser()
 #optparser.add_option("-d", "--datadir", dest="datadir", default="data", help="data directory (default=data)")
@@ -29,12 +29,16 @@ for j in range(n+1, 0):
 	matrix[0][j] = opts.gPenalty * j
 
 sys.stderr.write("Calculating DP table... \n")
-for i in range(1, m+1):
-	for j in range(1, n+1):
-		match = matrix[i-1][j-1] + scoring(string1[i-1], string2[j-1])
-		delete = matrix[i-1][j] + opts.gPenalty
-		insert = matrix[i][j-1] + opts.gPenalty
-		matrix[i][j] = max(match, delete, insert)
+
+def wrapper():
+	for i in range(1, m+1):
+		for j in range(1, n+1):
+			match = matrix[i-1][j-1] + scoring(string1[i-1], string2[j-1])
+			delete = matrix[i-1][j] + opts.gPenalty
+			insert = matrix[i][j-1] + opts.gPenalty
+			matrix[i][j] = max(match, delete, insert)
+
+checkalgo = timeit.timeit(wrapper,number=1)
 
 # Traceback Algorithm
 sys.stderr.write("Performing traceback... \n")
@@ -87,4 +91,4 @@ print aligned1
 print aligned2
 print 'Identity =', "%3.3f" % identity, 'percent'
 print 'Score =', score
-
+print 'DP time = ', checkalgo
