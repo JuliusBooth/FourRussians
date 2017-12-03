@@ -5,7 +5,7 @@ public class StandardGlobalAlignment {
 
     public static void main(String[] args) {
         StandardGlobalAlignment sga = new StandardGlobalAlignment();
-        sga.init("AAGTGCA", "ACGTTC", 1, 0, 1);
+        sga.init("AAGTGC", "ACGTTC", 1, 0, 1);
         System.out.println(sga.getOptimalCost());
         sga.printCostMatrix();
         String[] optimalAlignment = sga.getOptimalAlignment();
@@ -64,7 +64,7 @@ public class StandardGlobalAlignment {
         this.mismatchCost = mismatchCost;
     }
 
-    public void init(String firstSeq, String secondSeq, int gapCost, int matchCost, int mismatchCost) {
+    private void baseInit(String firstSeq, String secondSeq, int gapCost, int matchCost, int mismatchCost) {
         setFirstSeq(firstSeq);
         setSecondSeq(secondSeq);
         setGapCost(gapCost);
@@ -74,6 +74,45 @@ public class StandardGlobalAlignment {
         this.traces = new int[n + 1][m + 1];
         this.optimalAlignment = new String[2];
     }
+
+    public void init(String firstSeq, String secondSeq, int gapCost, int matchCost, int mismatchCost) {
+        baseInit(firstSeq, secondSeq, gapCost, matchCost, mismatchCost);
+        initialFirstRowCol();
+    }
+
+    public void init(String firstSeq, String secondSeq, int gapCost, int matchCost, int mismatchCost, int[] offsetRow, int[] offsetCol) {
+        baseInit(firstSeq, secondSeq, gapCost, matchCost, mismatchCost);
+        setFirstRowCol(offsetRow, offsetCol);
+    }
+
+    private void initialFirstRowCol() {
+        setCost(0, 0, 0);
+        for (int i = 1; i <= n; i++) {
+            setCost(i, 0, getCost(i - 1, 0) + getGapCost());
+            setTrace(i, 0, 3);
+        }
+        for (int j = 1; j <= m; j++) {
+            setCost(0, j, getCost(0, j - 1) + getGapCost());
+            setTrace(0, j, 2);
+        }
+    }
+
+    private void setFirstRowCol(int[] firstRow, int[] firstCol) {
+        setCost(0, 0, 0);
+        int current = 0;
+        for (int i = 1; i <= n; i++) {
+            current += firstRow[i - 1];
+            setCost(i, 0, current);
+            setTrace(i, 0, 3);
+        }
+        current = 0;
+        for (int j = 1; j <= m; j++) {
+            current += firstCol[j - 1];
+            setCost(0, j, current);
+            setTrace(0, j, 2);
+        }
+    }
+
 
     private void setCost(int i, int j, int cost) {
         this.costs[i][j] = cost;
@@ -116,16 +155,19 @@ public class StandardGlobalAlignment {
         return getCost(n , m);
     }
 
-    private void doAlignment() {
-        setCost(0, 0, 0);
+    public OffsetFunctionOutput getOffsets() {
+        int[] offsetRow = new int[n];
         for (int i = 1; i <= n; i++) {
-            setCost(i, 0, getCost(i - 1, 0) + getGapCost());
-            setTrace(i, 0, 3);
+            offsetRow[i - 1] = costs[i][m] - costs[i - 1][m];
         }
+        int[] offsetCol = new int[m];
         for (int j = 1; j <= m; j++) {
-            setCost(0, j, getCost(0, j - 1) + getGapCost());
-            setTrace(0, j, 2);
+            offsetCol[j - 1] = costs[n][j] - costs[n][j - 1];
         }
+        return new OffsetFunctionOutput(offsetRow, offsetCol);
+    }
+
+    public void doAlignment() {
         for (int i = 1; i <= n; i++) {
             for (int j = 1; j <= m; j++) {
                 int d = getFirstSeq().charAt(i - 1) == getSecondSeq().charAt(j - 1) ? getMatchCost() : getMismatchCost();
