@@ -83,8 +83,8 @@ for x in range(0,len(aligned1)):
     
 identity = float(identity) / len(aligned1) * 100
     
-print 'Identity =', "%3.3f" % identity, 'percent'
-print 'Score =', score
 print aligned1
 print aligned2
+print 'Identity =', "%3.3f" % identity, 'percent'
+print 'Score =', score
 

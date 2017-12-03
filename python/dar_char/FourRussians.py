@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import optparse, sys, os, logging, math, numpy
+import optparse, sys, os, logging, math, numpy, timeit
 
 optparser = optparse.OptionParser()
 #optparser.add_option("-d", "--datadir", dest="datadir", default="data", help="data directory (default=data)")
@@ -8,11 +8,15 @@ optparser.add_option("-b", "--blockpenalty", dest="bPenalty", default=-1, type="
 optparser.add_option("-s", "--matchscore", dest="mScore", default=2, type="int", help="Scoring for a match (default=2)")
 optparser.add_option("-m", "--mismatch", dest="mismatch", default=-1, type="int", help="Penalty for mismatching (default=-1)")
 optparser.add_option("-p", "--gappenalty", dest="gPenalty", default=-1, type="int", help="Penalty for gap (default=-1)")
+optparser.add_option("-u", "--userinput", dest="uInput", default=0, type="int", help="1 to enter own strings, 0 as default strings")
 (opts, _) = optparser.parse_args()
 
-sys.stderr.write("INSERT ALL STRINGS IN LOWER CASE!!\n")
-string1 = raw_input("Enter String 1: ")
-string2 = raw_input("Enter String 2: ")
+if opts.uInput == 1:
+	string1 = raw_input("Enter String 1: ")
+	string2 = raw_input("Enter String 2: ")
+else:
+	string1 = "CTATCTACTACCCGCGCCCGGGGGCTACGCAGGTCGTGGGGTGCGGGGGAGGCCCTCGATCTTCCCGTGGGACGTCGACCTTCCCCTTGATAAAGCGCCCCGCTCGGGTGTGGCAGTGAGCACGCCTTCTGAGTTGTGCCAACCCTCGTCCTCACCGAAGCTTGCTGCCAATGATTAGGATCGCTGCCTCGCGACAGACCTCCCGCCCACACCCGCCCGCGCTGAGCTACCCGGCGGGCCGTCAGCCTGACCCGCTCTGTGGGGTCGCGACTACGTGGGCCAGGGCTCCGGACCGCGCCGTATAGTCGGGCCCGATCTCGCCCCCGCAACTGCAAGCCCCAGCTTGTTCGGGTAACGTGGTTAGCCGAAGTTGCACGGGGTGCCCGCCGCGGACTCCTCCCCGGGTGTCGCTCCTCCATCCGACAACGCGCGGCCGCCACCGCCGCCGATTGGTACGGCGGACGGTGGCGTCGTCGTAGGCCCGGCACGTTTCCCTTGTGGGTGTGAGGCCACCTGGCTTCGCGCCGAGGTCCCATGGCAGAACCGATGGACTATGTTCCGGGTGGCACCGGGAGTCTGTAGCGCGTGCATCCCGGCGTGGCGCGCGTGCGCCTTAATCACCGCTCCATGCTAGGGCCCTGGCTGCATGCTACGTTGACACGCCCGCGCCGCCCGGGGAAAATATGCGAGGCGGGCGGCCTGGCCGGAGCGCTACCGCGCCGGCGCGTGTTCGAGTACTGTTGACTGCCCGCACATGAGCAAAACGGTGGACCGTCAACCCCGGCCCTCTTACCCCCGGCGTTGTGCGTCAAATGGCGCAGGTCCGGGTTGGCTCCGCGACGGTACCTGCTGGTGGGTAGGGAGACCCAGAGCCCGTCGGCCCATGTCGCTAAAGCTTTCCGAACGCCCCGTGCCGACGCCGGGCGAGTCGGCGCACGCTCCCCTCCTTGGAGGCGCGCAGTCATACGACCGGGCACATGATGCGTACGCCCGCCCGATG"
+	string2 = "CGTCCAGCTCCCCAGGCCCCGTCCGAGAGCTGGAAGGGCACCCTCCACTTGGTCGGGCGACATCCTCGCGGGGCGAGCCCGCACCGTCACTCGTGCGGAAGGGGCAAGACCGTTGGGAGCAGGGGTGGTCCCGAACCTCGCTTACCACTCCCAGTGAGGGACCCCTGTCTGGAGGGCGGGTGTCAGCCAGCGCAACCCGATGGGGCGCCCGGGAGCCGGACTGGGCCAGACAACCCGGCGCTGACGCACTCGGAGCCGGGGCGCGACGCGACATATCGGCCGAGAGTAGGCCGGGGGTGTAGACCTTCGGGGTTGAACAAACCCGTCGCAGCAACCGGCTTCAACGACCCGCACGGGCGGCGCCTCAGGAGGGGCCCGCAGGGAGGAAGTTCTCTGCTGCCCGCGGCCGCTCGCGGCGGCTAGCCGCGTCCCCAGCCACCGCAGCTGTTTCTAAGCCGTGCAATGGGAACAACCACACCACGGCGAACCGATGCGCCGCCTCGGGGTACCGTTTTGGCAACCCCTTACTAGGGCCATCGCGGCCCTCAGGCATCGCGCACGTAGGGCCGGACCGCGCGCATGTCGAACTGCTGGCGAGCCGCGATCCCACGACCGGCGCACGATCCAACTGCGCCGGCGCGACGACGTCCCTGCTAACGCCCCGCCCGCCGGACCGCCCTCGCGATGGGGCGGCCGGGCACGACCTTGTGACATGTAACGAGGGTCTACTCGTTTAGCCACCTCGCGGCGAAAGCCGGGGGGACGGCGGCCGCTGCAGACACTATACCGCGACTACGCCAAGCTGAGATAGCCCCGTGGTCGACTACGCATCCCTCTGGGCCTCACTCAGCCGGATACAGTGACTTTGACAGGTTTGCGGGCCACGGCAGCCACCCGCACAGCCGCGTGCGGGGGGAGCAACCCTTGGGCGTTAGTATGTTGACCCCTGTACTAGGGATGCGGGCAGCAGATGCGGGCGGAGACACCCGGGCCAGGCACA"
 
 m = len(string1)
 n = len(string2)
@@ -21,7 +25,8 @@ t = 0
 if opts.tSize != 0: 
 	t = opts.tSize
 else:
-	t = int(math.ceil(math.log10(max(len(string1),len(string2)))/4))
+	t = int(math.ceil(math.log(max(len(string1),len(string2)),2)/4))
+#print t
 
 opts.bPenalty = opts.bPenalty * t
 #-------------------------------------------------
@@ -41,25 +46,24 @@ nStrings=[] #nucleotide string
 #init all possible blockstrings
 for i in range(pow(4, t)):
 	nStrings.append("")
-#init scores to 0
+#init lut scores to 0
 lut=[]
 for i in range(pow(4, t)):
 	tscore=[]
 	for j in range(pow(4, t)):
 		tscore.append(0)
 	lut.append(tscore)
-#print(lut)
 #generate all possible blockstrings, put into blockstrings list
 for j in range(t, 0, -1):
 	for i in range(pow(4, t)):
 		if (i % pow(4,j)) in range(0, pow(4,j-1)):
-			nStrings[i]+="a"	
+			nStrings[i]+="A"	
 		if (i % pow(4,j)) in range(pow(4,j-1), 2*pow(4,j-1)):
-			nStrings[i]+="c"
+			nStrings[i]+="C"
 		if (i % pow(4,j)) in range(2*pow(4,j-1), 3*pow(4,j-1)):
-			nStrings[i]+="g"	
+			nStrings[i]+="G"	
 		if (i % pow(4,j)) in range(3*pow(4,j-1), (pow(4,j))):
-			nStrings[i]+="t"
+			nStrings[i]+="T"
 #print(nStrings)
 #align all blockstrings to each other to generate LUT of scores
 for i in range(0, pow(4, t)):
@@ -79,18 +83,31 @@ sys.stderr.write("LUT complete...\n")
 #-------------------------------------------------
 def lut_search(i,j): #find LUT for ith block of v and jth block of u
 	key = (i,j)
-	return hTable[key]
+	#if uneven strings, perform normal block alignment instead
+	try: 
+		ans = hTable[key]
+	except KeyError:
+		ans = block_score(i,j)
+	return ans
 
 def block_score(b1, b2): #scoring for regular block alignment
 	bScore = 0
-	for a in range(0,t):
-		if b1[a] == b2[a]:
-			bScore = opts.mScore
-		elif b1[a] == '-' or b2[a] == '-':
-			bScore = opts.gPenalty
-		else:
-			bScore = opts.mismatch
-	return bScore
+	if len(b1) != len(b2):
+		diff = abs(len(b1) - len(b2))
+		pen = diff * opts.gPenalty #penalty
+		for a in range(0,len(max(b1,b2))-diff):
+			if b1[a] == b2[a]:
+				bScore += opts.mScore
+			else:
+				bScore += opts.gPenalty
+		return bScore + pen
+	else:
+		for a in range(0,len(b1)):
+			if b1[a] == b2[a]:
+				bScore += opts.mScore
+			else:
+				bScore += opts.mismatch
+		return bScore
 
 def reg_score(b1,b2): #scoring for global pairwise alignment
 	if b1 == b2:
@@ -118,20 +135,25 @@ for i in range (0,len(string2))[::t]:
 	blocks2 = numpy.append(blocks2,temp)
 
 sys.stderr.write("Calculating DP table... \n")
-for i in range(1, len(blocks1)+1):
-	for j in range(1, len(blocks2)+1):
-		match = dpMatrix[i-1][j-1] + lut_search(blocks1[i-1], blocks2[j-1])
-		delete = dpMatrix[i-1][j] + opts.bPenalty
-		insert = dpMatrix[i][j-1] + opts.bPenalty
-		dpMatrix[i][j] = max(match, delete, insert)
-		#print dpMatrix[i][j]
+def wrapper():
+	for i in range(1, len(blocks1)+1):
+		for j in range(1, len(blocks2)+1):
+			match = dpMatrix[i-1][j-1] + lut_search(blocks1[i-1], blocks2[j-1])
+			delete = dpMatrix[i-1][j] + opts.bPenalty
+			insert = dpMatrix[i][j-1] + opts.bPenalty
+			dpMatrix[i][j] = max(match, delete, insert)
+			#print dpMatrix[i][j]
+
+checkalgo = timeit.timeit(wrapper,number=1)
+
+sys.stderr.write("DP table completed...\n")
 
 # Traceback Algorithm
 sys.stderr.write("Performing traceback... \n")
 aligned1 = ''
 aligned2 = ''
 # start from bottom right of the matrix and move towards top left
-i, j = m, n 
+i, j = len(blocks1), len(blocks2) 
 align_score = 0
 while i > 0 and j > 0:
 	score_current = dpMatrix[i][j]
@@ -139,18 +161,24 @@ while i > 0 and j > 0:
 	score_up = dpMatrix[i][j-1]
 	score_left = dpMatrix[i-1][j]
 
-	if score_current == score_diagonal + reg_score(string1[i-1], string2[j-1]):
-		aligned1 += string1[i-1]
-		aligned2 += string2[j-1]
+	if score_current == score_diagonal + lut_search(blocks1[i-1], blocks2[j-1]):
+		temp1 = blocks1[i-1]
+		temp2 = blocks2[j-1]
+		aligned1 += temp1[::-1]
+		aligned2 += temp2[::-1]
 		i -= 1
 		j -= 1
-	elif score_current == score_left + opts.gPenalty:
-		aligned1 += string1[i-1]
-		aligned2 += '-'
+	elif score_current == score_left + opts.bPenalty:
+		temp1 = blocks1[i-1]
+		aligned1 += temp1[::-1]
+		for a in range(0,t):
+			aligned2 += '-'
 		i -= 1
-	elif score_current ==  score_up + opts.gPenalty:
-		aligned1 += '-'
-		aligned2 += string2[j-1]
+	elif score_current ==  score_up + opts.bPenalty:
+		for a in range(0,t):
+			aligned1 += '-'
+		temp2 = blocks2[j-1]
+		aligned2 += temp2[::-1]
 		j -= 1
 
 sys.stderr.write("Traceback comeplete... \n")
@@ -161,7 +189,7 @@ aligned2 = aligned2[::-1]
 identity = 0 #for calculating percent identity
 score = 0 # total alignment cost
 
-# output alignment with score and identity %  
+#output alignment with score and identity %  
 for x in range(0,len(aligned1)):
 	if aligned1[x] == aligned2[x]:
 		identity += 1
@@ -173,7 +201,9 @@ for x in range(0,len(aligned1)):
     
 identity = float(identity) / len(aligned1) * 100
     
-print 'Identity =', "%3.3f" % identity, 'percent'
-print 'Score =', score
 print aligned1
 print aligned2
+print 'Identity =', "%3.3f" % identity, 'percent'
+print 'Score =', score
+print 'DP time = ', checkalgo
+
