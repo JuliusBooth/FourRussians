@@ -2,13 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1fd60468-f62d-4bea-92b2-77bb012cc80e" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/OffsetFunctionInput.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/OffsetFunctionOutput.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/TBlock.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/FourRussiansSpeedup.java" afterPath="$PROJECT_DIR$/src/FourRussiansSpeedup.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/StandardGlobalAlignment.java" afterPath="$PROJECT_DIR$/src/StandardGlobalAlignment.java" />
     </list>
     <ignored path="GlobalAlignment.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -727,12 +721,12 @@
       <updated>1511424883687</updated>
       <workItem from="1511424885219" duration="5314000" />
       <workItem from="1511480218537" duration="2500000" />
-      <workItem from="1511528854471" duration="26257000" />
+      <workItem from="1511528854471" duration="26669000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="34071000" />
+    <option name="totallyTimeSpent" value="34483000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1280" height="800" extended-state="0" />

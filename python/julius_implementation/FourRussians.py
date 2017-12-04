@@ -108,20 +108,24 @@ def paste_bts(bts,t_length,n):
     return ("".join(t), "".join(s))
 
 
-def russian_align(strS,strT,t,backtrack=False):
+def russian_align(strS,strT,t,backtrack=False, precomputedLUT=None):
     #tried to speed this up as much as possible
     bt_matrices=[]
-    LUT = (gen_LUT(t,backtrack)) #generate lookup table
-    M = np.zeros((len(strS) + 1, len(strT) + 1))
+
+    if precomputedLUT == None:
+        LUT = (gen_LUT(t,backtrack)) #generate lookup table
+    else:
+        LUT = precomputedLUT
+    M = np.zeros((len(strT) + 1, len(strS) + 1))
+
     dx_dic = {i:strS[i:i+t] for i in range(0,len(strS),t)} #for speed
 
     for j in range(0,len(strT),t):
         dy = strT[j:j + t]
         by=(0,)*t
         for i in range(0,len(strS),t):
-
             A = M[j,i]
-            if j ==0:
+            if j == 0:
                 bx=(0,)*t
             else:
                 bx = tuple(M[j-1,i:i+t])
@@ -130,36 +134,10 @@ def russian_align(strS,strT,t,backtrack=False):
             bt_matrices.append(back_tracking_ht)
             M[j+t,i+t] = A + sumbx + sumby1
             M[j+t-1,i:i+t] = bx
+
     if backtrack:
         aligned_s, aligned_t=paste_bts(bt_matrices,t,len(strS))
         print(aligned_s)
         print(aligned_t)
     print("Final Score:")
-    print(M[len(strS),len(strT)])
-
-
-
-#TESTING
-
-
-def wrapper(func, *args):
-    def wrapped():
-        return func(*args)
-    return wrapped
-
-import random
-import timeit
-str1 = ''.join(random.choice("AGTC") for x in range(4002))#Number needs to be divisible by t
-str2 = ''.join(random.choice("AGTC") for x in range(4002))
-t = 3
-
-
-
-#print(str1,str2)
-wrapped_lut3 = wrapper(gen_LUT,3)
-#print(timeit.timeit(wrapped_lut3,number=2))
-wrapped_russian = wrapper(russian_align,str1,str2,t,False)
-
-
-print(timeit.timeit(wrapped_russian,number=1))
-
+    print(M[len(strT),len(strS)])

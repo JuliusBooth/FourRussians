@@ -48,18 +48,18 @@ def global_align(s,t,backtrack=False):
 #TESTING
 
 
-def wrapper(func, *args):
-    def wrapped():
-        return func(*args)
-    return wrapped
+# def wrapper(func, *args):
+#     def wrapped():
+#         return func(*args)
+#     return wrapped
 
-import random
-import timeit
-str1 = ''.join(random.choice("AGTC") for x in range(4002))#Number needs to be divisible by t
-str2 = ''.join(random.choice("AGTC") for x in range(4002))
-#print(str1,str2)
+# import random
+# import timeit
+# str1 = ''.join(random.choice("AGTC") for x in range(4002))#Number needs to be divisible by t
+# str2 = ''.join(random.choice("AGTC") for x in range(4002))
+# #print(str1,str2)
 
 
-wrapped_regular = wrapper(global_align,str1,str2,False)
+# wrapped_regular = wrapper(global_align,str1,str2,False)
 
-print(timeit.timeit(wrapped_regular,number=1))
+# print(timeit.timeit(wrapped_regular,number=1))
