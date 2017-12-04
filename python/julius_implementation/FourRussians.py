@@ -115,32 +115,33 @@ def russian_align(strS,strT,t,backtrack=False, precomputedLUT=None):
         LUT = (gen_LUT(t,backtrack)) #generate lookup table
     else:
         LUT = precomputedLUT
-    M = np.zeros((len(strT) + 1, len(strS) + 1))
+
 
     dx_dic = {i:strS[i:i+t] for i in range(0,len(strS),t)} #for speed
-    bx_vec = [0]*(len(strS)//t)
+    bx_vec = [(0,)*t]*(len(strS)//t)
+
+    F_vec = [0]*(len(strS)//t + 1)
     for j in range(0,len(strT),t):
         dy = strT[j:j + t]
         by=(0,)*t
         for i in range(0,len(strS),t):
-            A = M[j,i]
-            if j == 0:
-                bx=(0,)*t
-            else:
-                
-                bx = bx_vec[i//t]
+            index = i//t
+            A = F_vec[index]
+
+            bx = bx_vec[index]
             dx = dx_dic[i]
             bx,by,sumbx,sumby1,back_tracking_ht = LUT[(dx,dy,bx,by)]
             bt_matrices.append(back_tracking_ht)
-            M[j+t,i+t] = A + sumbx + sumby1
 
-            bx_vec[i//t]=bx
+            F_vec[index] = A + sumbx + sumby1
+            bx_vec[index]=bx
+        F_vec = [0] + F_vec[:-1]
 
     if backtrack:
         aligned_s, aligned_t=paste_bts(bt_matrices,t,len(strS))
         print(aligned_s)
         print(aligned_t)
     print("Final Score:")
-    print(M[len(strT),len(strS)])
-
+    #print(M[len(strT),len(strS)])
+    print(F_vec[-1])
 
