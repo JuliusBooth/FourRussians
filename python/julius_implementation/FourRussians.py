@@ -70,11 +70,13 @@ def get_binary_differences(s):
     return(s)
 
 
-def paste_bts(bts,t_length,n):
+def paste_bts(bts,t_length,strS,strT):
     # pretty messy function
+    # I got s and t mixed up at some point but it works so whatever
     # backtracks by selecting the right backtracking path and t_square based on the end point of the path through the last t_square
     s = []
     t=[]
+    n=len(strS)
     index = len(bts)-1
     side_length=int(n//t_length)
     start,alignment=(bts[index][t_length, t_length])
@@ -83,6 +85,7 @@ def paste_bts(bts,t_length,n):
     t=alignment[0]+t
 
     while index>0:
+
         if start==(0,0):
             if index - (side_length+1) < 0:
                 break
@@ -94,18 +97,33 @@ def paste_bts(bts,t_length,n):
 
         elif start[0]==0:
             start = (t_length, start[1])
+            if index - side_length < 0:
+
+                break
             index-=side_length
             start, alignment = bts[index][start]
             s = alignment[1] + s
             t = alignment[0] + t
         else:
+            if (index -1)%side_length==0:
+                break
             index -= 1
             start = (start[0], t_length)
             start, alignment = bts[index][start]
             s = alignment[1] + s
             t = alignment[0] + t
-
-    return ("".join(t), "".join(s))
+    #fixes the beginning of alignment
+    temp_s= "".join(s).replace("-","")
+    temp_t = "".join(t).replace("-","")
+    i = strT.find(temp_s)
+    j = strS.find(temp_t)
+    ss = strT[:i] + "".join(s)
+    tt = strS[:j] +"".join(t)
+    s_dif = len(ss) - len(tt)
+    t_dif= len(tt) - len(ss)
+    if s_dif > 0: tt = "-"*s_dif + tt
+    if t_dif > 0: ss = "-" * t_dif + ss
+    return (tt, ss)
 
 
 def russian_align(strS,strT,t,backtrack=False, precomputedLUT=None):
@@ -138,7 +156,7 @@ def russian_align(strS,strT,t,backtrack=False, precomputedLUT=None):
         F_vec = [0] + F_vec[:-1]
 
     if backtrack:
-        aligned_s, aligned_t=paste_bts(bt_matrices,t,len(strS))
+        aligned_s, aligned_t=paste_bts(bt_matrices,t,strS,strT)
         print(aligned_s)
         print(aligned_t)
     print("Final Score:")
