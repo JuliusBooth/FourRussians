@@ -5,6 +5,7 @@ delta = {('A', 'A'):0,('C', 'C'):0,('G', 'G'):0,('U', 'U'):0,('A', 'C'):0, ('A',
 def get_binary_differences(s):
     s = tuple(int(m - n) for n, m in zip(s, s[1:]))
     return (s)
+
 def backtrack(T,n,s):
     stack=[]
     fold = [[]]*n
@@ -43,8 +44,17 @@ def decode(b):
     a = np.array(x)
     return (a)
 
+def binary_strings_hash(b):
+    h = {}
+    for v_i, v in enumerate(b):
+        h[v] = v_i
+    return h
+
 def four_russian_fold(s, t, bt=False):
     binary_strings = list(itertools.product(range(2), repeat=t - 1))
+    decoded_bi_strings = [decode(s) for s in binary_strings] #for performance
+    bi_strings_hash = binary_strings_hash(binary_strings)
+
     n = len(s)
     T = np.zeros((n, n))
     R = {(0, 0, (0,)):1,(0, 0, (1,)):1}
@@ -54,15 +64,15 @@ def four_russian_fold(s, t, bt=False):
             T[i, j] = max(T[i + 1, j - 1] + delta[(s[i], s[j])],
                           T[i, j - 1])
         initialG = (j - 1 )// t
-        for i in reversed(range(j)):
+        for i in range(j - 1, -1, -1): # reversed(range(j)): #reverse can be removed
             T[i, j] = max(T[i, j],
                           T[i + 1, j])
             rowG = initialG
             currentG = (i-1)//t
             while rowG >= currentG:
                 if rowG < initialG and rowG > currentG:
-                    v = binary_vectors[rowG]
-                    k_star = R[(i, rowG, v)]
+                    v_i = binary_vectors[rowG]
+                    k_star = R[(i, rowG, v_i)]
                     T[i, j] = max(T[i, j],
                                   T[i, k_star-1] + T[k_star, j])
                 elif rowG == initialG:
@@ -81,13 +91,13 @@ def four_russian_fold(s, t, bt=False):
             if (i-1) % t == 0 and i+t <= j:
                 Vg = T[i:i + t, j]
                 vg = get_binary_differences(list(reversed(Vg)))
-                binary_vectors[currentG] = vg
+                binary_vectors[currentG] = bi_strings_hash[vg]
 
         #generate LUT after every t columns
         if j % t == t - 1 and j!=n:
             g = j // t
-            for v in binary_strings:
-                V_prime = decode(v)
+            for v_i, v in enumerate(binary_strings):
+                V_prime = decoded_bi_strings[v_i]
 
                 for i in range(j):
                     max_val = -100
@@ -99,16 +109,10 @@ def four_russian_fold(s, t, bt=False):
                             k_star = k+g*t+1
                             max_val = val
 
-                    R[(i, g, v)] = k_star
+                    R[(i, g, v_i)] = k_star
 
 
     if bt:
         backtrack(T,n,s)
-        print(T)
-    print(T[0, n - 1])
 
-
-
-
-
-
+    return(T[0, n - 1])

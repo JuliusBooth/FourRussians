@@ -5,6 +5,16 @@ from sys import argv
 from GlobalAlignment import global_align
 from FourRussians import russian_align, gen_LUT
 
+timeit.template = """
+def inner(_it, _timer{init}):
+    {setup}
+    _t0 = _timer()
+    for _i in _it:
+        retval = {stmt}
+    _t1 = _timer()
+    return retval, _t1 - _t0
+"""
+
 def wrapper(func, *args):
     def wrapped():
         return func(*args)
@@ -30,13 +40,18 @@ if l < 200:
 	print(str2)
 	print()
 
-print("Regular Global Alignment:")
+print("Regular Global Alignment")
 wrapped_regular = wrapper(global_align,str1,str2,backtrack)
-print(timeit.timeit(wrapped_regular,number=1))
+res = timeit.timeit(wrapped_regular,number=1)
+print('Final Score:', res[0])
+print('Time:', res[1])
+
 
 print("*"*60)
 
-print("Four-Russians Global Alignment:")
+print("Four-Russians Global Alignment")
 LUT = (gen_LUT(t,backtrack)) if preprocess else None #generate lookup table
 wrapped_russian = wrapper(russian_align,str1,str2,t,backtrack,LUT)
-print(timeit.timeit(wrapped_russian,number=1))
+res = timeit.timeit(wrapped_russian,number=1)
+print('Final Score:', res[0])
+print('Time:', res[1])

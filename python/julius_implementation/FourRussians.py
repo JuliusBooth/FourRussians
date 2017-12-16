@@ -159,7 +159,6 @@ def russian_align(strS,strT,t,backtrack=False, precomputedLUT=None):
         aligned_s, aligned_t=paste_bts(bt_matrices,t,strS,strT)
         print(aligned_s)
         print(aligned_t)
-    print("Final Score:")
+    # print("Final Score:")
     #print(M[len(strT),len(strS)])
-    print(F_vec[-1])
-
+    return F_vec[-1]

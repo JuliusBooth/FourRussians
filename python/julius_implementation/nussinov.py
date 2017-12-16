@@ -1,6 +1,10 @@
 import numpy as np
 
-delta = {('A', 'A'):0,('C', 'C'):0,('G', 'G'):0,('U', 'U'):0,('A', 'C'):0, ('A', 'G'):0, ('A', 'U'):1,  ('C', 'A'):0, ('C', 'G'):1, ('C', 'U'):0,  ('G', 'A'):0, ('G', 'C'):1, ('G', 'U'):0,  ('U', 'A'):1, ('U', 'C'):0, ('U', 'G'):0}
+delta = {('A', 'A'):0,('C', 'C'):0,('G', 'G'):0,('U', 'U'):0,
+('A', 'C'):0, ('A', 'G'):0, ('A', 'U'):1,  ('C', 'A'):0,
+('C', 'G'):1, ('C', 'U'):0,  ('G', 'A'):0, ('G', 'C'):1,
+('G', 'U'):0,  ('U', 'A'):1, ('U', 'C'):0, ('U', 'G'):0}
+
 def backtrack(T,n,s):
     stack=[]
     fold = [[]]*n
@@ -30,6 +34,7 @@ def backtrack(T,n,s):
                     break
     fold = "".join(char for char in fold)
     print(fold)
+
 def nussinov(s,bt=False):
     n= len(s)
     T = np.zeros((n, n))
@@ -46,7 +51,4 @@ def nussinov(s,bt=False):
     if bt:
         backtrack(T,n,s)
 
-        return(T[0,n-1])
-
-
-
+    return(T[0,n-1])

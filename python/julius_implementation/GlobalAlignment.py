@@ -40,8 +40,8 @@ def global_align(s,t,backtrack=False):
         aligned_s,aligned_t=compute_backtrack(s,t,T)
         print(aligned_s)
         print(aligned_t)
-    print("Final Score:")
-    print(T[len(s), len(t)])
+    # print("Final Score:")
+    return T[len(s), len(t)]
 
 
 
