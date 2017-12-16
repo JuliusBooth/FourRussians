@@ -11,7 +11,7 @@ Example:
 ./run_GA 100 2 backtrack
 ./run_GA 4800 3 preprocess
 ```
-Note that length of sequence assumed to be multiple of t.
+Note that length of sequence is assumed to be multiple of t.
 
 ## Nussinov RNA folding
 To run Four-Russians speedup to nussinov RNA folding:
